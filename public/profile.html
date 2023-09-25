@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ST CHESS</title>
+    <link rel="icon" href="./img/icon.jpg" />
+    <link rel="stylesheet" type="text/css" href="./css/semantic.min.css" />
+    <link rel="stylesheet" href="./css/chessboard-1.0.0.min.css" />
+    <link rel="stylesheet" href="./css/styles.css" />
+    <link rel="stylesheet" href="jquery-ui-1.11.4.custom/jquery-ui.css" />
+    <!-- <link
+      href="https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css"
+      rel="stylesheet"
+    /> -->
+  </head>
+  <script>
+    function showFile() {
+      if (window.File && window.FileReader && window.FileList && window.Blob) {
+        var file = document.querySelector("input[type=file]").files[0];
+        var reader = new FileReader();
+        var textFile = /text.*/;
+        if (file.type.match(textFile)) {
+          reader.onload = function (event) {
+            if (document.querySelector("#isLoadFEN").checked)
+              sessionStorage.setItem("fen", event.target.result);
+            if (document.querySelector("#isLoadSAN").checked)
+              sessionStorage.setItem("pgn", event.target.result);
+
+            console.log(event.target.result);
+          };
+        } else {
+          alert("It doesn't seem to be a text file!");
+        }
+        reader.readAsText(file);
+      } else {
+        alert("Your browser is too old to support HTML5 File API");
+      }
+    }
+  </script>
+  <body>
+    <audio id="myAudio">
+      <source src="./mp3/soundMove.mp3" type="audio/mpeg" />
+      Your browser does not support the audio element.
+    </audio>
+    <audio id="messageTone">
+      <source src="./mp3/insight.mp3" type="audio/mpeg" />
+      Your browser does not support the audio element.
+    </audio>
+    <!-- Navbar -->
+    <div>
+      <div
+        style="margin: 0; border-bottom: 4px solid gray; padding: 3px 0"
+        class="ui secondary menu"
+      >
+        <img src="./img/icon.png" style="width: 80px; height: 80px" />
+        <h2 style="text-decoration: underline">ST CHESS</h2>
+        <div class="right menu">
+          <div
+            style="
+              margin-top: 20px;
+              height: 40px;
+              padding-left: 20px;
+              margin-right: 15px;
+            "
+            class="ui labeled button"
+            tabindex="0"
+            onclick="window.location.href = '/'"
+          >
+            <div class="ui button"><i class="home icon"></i> Home</div>
+          </div>
+
+          <div
+            style="
+              margin-top: 20px;
+              height: 40px;
+              padding-right: 20px;
+              margin-right: 15px;
+            "
+            class="ui labeled button"
+            tabindex="0"
+            onclick="window.location.href = '/logout'"
+          >
+            <div class="ui button"><i class="logout icon"></i> Logout</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div id="gameMode">
+        <h1 style="text-align: center; margin: 10px; font-size: 35px">
+          Profile Page
+        </h1>
+        <div style="text-align: center">
+          You are Logged in as :
+          <p id="userName"></p>
+        </div>
+        <div style="text-align: center">
+          Your Game History :
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Room</th>
+                <th>Time</th>
+                <th>History</th>
+                <th>Opponent</th>
+              </tr>
+            </thead>
+            <tbody id="gameHistory"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chatting window -->
+
+    <!-- <script
+      src="https://code.jquery.com/jquery-3.1.1.min.js"
+      integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js"
+      integrity="sha256-xI/qyl9vpwWFOXz7+x/9WkG5j/SVnSw21viy8fWwbeE="
+      crossorigin="anonymous"
+    ></script> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="jquery-ui-1.11.4.custom/jquery-ui.js"></script>
+    <script src="./js/semantic.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="./js/chessboard-1.0.0.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.js"
+      integrity="sha384-s3XgLpvmHyscVpijnseAmye819Ee3yaGa8NxstkJVyA6nuDFjt59u1QvuEl/mecz"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="./js/boom/profile.js" type="module"></script>
+  </body>
+  <style></style>
+</html>

@@ -1,6 +1,7 @@
 // TODO : BOard Refreshes to new state after loading
 const whiteColor = document.getElementById('white');
 const blackColor = document.getElementById('black');
+// TODO If URL params have type=fromProfile then load game from session directly
 
 const myAudioEl = document.getElementById('myAudio');
 // const startEditor = document.getElementById('startEditor');
@@ -63,13 +64,22 @@ $(function () {
 		$("#dialog-4").dialog("open");
 	});
 });
-document.getElementById('backButton').addEventListener("click", (e) => { e.preventDefault(); sessionStorage.clear(); window.location.reload() });
+document.getElementById('backButton').addEventListener("click", (e) => {
+	e.preventDefault();
+	sessionStorage.clear();
+	if (urlParams.get('type') && urlParams.get('type') === 'fromProfile') window.location.href = "/profile.html"
+	else
+		window.location.reload()
+});
 document.getElementById('startState').addEventListener("click", (e) => { e.preventDefault(); startState() });
 document.getElementById('prevState').addEventListener("click", (e) => { e.preventDefault(); prevState() });
 document.getElementById('nextState').addEventListener("click", (e) => { e.preventDefault(); nextState() });
 document.getElementById('endState').addEventListener("click", (e) => { e.preventDefault(); endState() });
 
 
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('type') && urlParams.get('type') === 'fromProfile')
+	setupGameBoard(sessionStorage.getItem("loadColor"))
 function setupGameBoard(orientation = 'white') {
 	if (setLoadGame()) {
 		document.getElementById('gameMode').style.display = "none";
@@ -433,10 +443,9 @@ function setLoadGame() {
 
 	if (sessionStorage.length === 0)
 		loadGame = false
-	else if (sessionStorage.length === 2)
+	else if (sessionStorage.length === 2 || sessionStorage.length === 3)
 		loadGame = true
-	else
-		alert("Refresh Browser")
+	else { alert("Refresh Browser"); return }
 	if (loadGame)
 		switch (sessionStorage.getItem("loadType")) {
 			case "fen":

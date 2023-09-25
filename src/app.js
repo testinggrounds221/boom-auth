@@ -2,17 +2,54 @@ const path = require('path')
 const http = require('http')
 const express = require('express')
 const socketio = require('socket.io')
-
+const axios = require('axios');
 var Chess = require('chess.js').Chess;
 
 const app = express()
 const server = http.createServer(app)
 const io = socketio(server)
-
+require('dotenv').config()
 const port = process.env.PORT || 3000
 const publicDirectoryPath = path.join(__dirname, '../public')
-
+const { auth } = require('express-openid-connect');
+const { requiresAuth } = require('express-openid-connect');
+const config = {
+	authRequired: true,
+	auth0Logout: true,
+	secret: process.env.AUTH0_SECRET,
+	baseURL: 'http://localhost:3000',
+	clientID: process.env.AUTH0_CLIENT_ID,
+	issuerBaseURL: 'https://dev-hdklbyherefykad5.us.auth0.com'
+};
+app.use(auth(config));
 app.use(express.static(publicDirectoryPath))
+app.get('/', requiresAuth(), (req, res) => {
+	res.sendFile(path.join(__dirname, '../public/home.html'))
+	// res.send(JSON.stringify(req.oidc.user));
+});
+app.get('/profile', requiresAuth(), (req, res) => {
+
+	let userData = req.oidc.user
+	console.log("userdata", userData);
+	let data = {
+		"player_email": userData.email
+	}
+	console.log("Retreving from DB : ", data)
+	// TODO: throw errror if oponent is null
+	axios.post(`${process.env.MONGODB_API}/getcheckpoints`, data)
+		.then(function (response) {
+			res.send(JSON.stringify({ userData, data: response.data, success: true }));
+			// callback({ userData, data: response.data, success: true })
+			// console.log(response.data);
+		})
+		.catch(function (error) {
+			console.log(error);
+			res.send({ data: error, success: false })
+		});
+
+	// res.send(JSON.stringify(req.oidc.user.data));
+
+})
 // const Data = new Map()
 const gameData = new Map()
 const userData = new Map()
@@ -60,6 +97,40 @@ io.on('connection', (socket) => {
 		else
 			callback("Invalid load type")
 		console.log(roomFen[room])
+	})
+
+	socket.on('saveHistory', (incomingData, callback) => {
+		let opponent_mail = null
+		var user = incomingData.player_mail
+		var room = incomingData.room
+		for (var x in userData) {
+			if (userData[x].room === room) {
+				if (userData[x].user !== user) {
+					opponent_mail = userData[x].user
+				}
+			}
+		}
+		if (opponent_mail == null) {
+			callback({ message: "Error Saving Checkpoint. Oponent not found", success: false })
+			return
+		}
+		console.log("opp", opponent_mail)
+		let data = {
+			...incomingData,
+			time: JSON.stringify(new Date()),
+			opponent_mail
+		}
+		console.log("Saving to DB : ", data)
+
+		axios.post(`${process.env.MONGODB_API}/checkpoint`, data)
+			.then(function (response) {
+				callback({ message: "Successfully Saved Checkpoint", success: true })
+				console.log(response.data);
+			})
+			.catch(function (error) {
+				callback({ message: "Error occured in DB", success: false })
+				callback(error)
+			});
 	})
 
 	function handleJoinFEN(user, room, loadFen, callback) {

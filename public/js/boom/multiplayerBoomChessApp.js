@@ -12,6 +12,7 @@ const sendButtonEl = document.querySelector('#send')
 const chatContentEl = document.getElementById('chatContent')
 const saveFen = document.getElementById('saveFen');
 const savePGN = document.getElementById('savePGN');
+const saveCheckpoint = document.getElementById('saveCheckpoint');
 let currentSource = null
 var game = new Chess()
 var turnt = 0;
@@ -320,6 +321,12 @@ function saveFenListener(e) {
 
 function savePGNListener(e) {
 	e.preventDefault();
+	let savePgnText = getPGN()
+
+	downloadFile("pgn.txt", savePgnText)
+}
+
+function getPGN() {
 	let wt = document.getElementById("whiteMoves")
 	let bt = document.getElementById("blackMoves")
 
@@ -340,9 +347,7 @@ function savePGNListener(e) {
 		savePgnText += (wp + 1 + ". " + wr[wp].children[0].innerText)
 
 	savePgnText = savePgnText.trim()
-	// navigator.clipboard.writeText(savePgnText);
-	// alert("Copied the PGN : " + savePgnText + " to clipboard")
-	downloadFile("pgn.txt", savePgnText)
+	return savePgnText
 }
 
 //Update Status Event
@@ -633,6 +638,7 @@ joinButtonEl.addEventListener('click', (e) => {
 
 saveFen.addEventListener('click', saveFenListener)
 savePGN.addEventListener('click', savePGNListener)
+saveCheckpoint.addEventListener('click', saveCheckpointListener)
 
 
 function time_remaining(endtime) {
@@ -1087,3 +1093,40 @@ function downloadFile(filename, text) {
 
 	document.body.removeChild(element);
 }
+
+function saveCheckpointListener() {
+	var user = formEl[0].value, room = formEl[1].value
+	let savePgnText = getPGN()
+
+	socket.emit('saveHistory', {
+		"player_mail": user,
+		room,
+		"color": editorBoard.orientation(),
+		"history": savePgnText,
+		"checkPointName": "chckName"
+	}, (data) => {
+		alert(data.message)
+	})
+}
+
+function setUserName(params) {
+	const userName = document.getElementById("userName");
+
+	axios
+		.get("/profile")
+		.then(function (response) {
+			// handle success
+			console.log(response.data);
+			userName.value = response.data.userData.email;
+			userName.disabled = true;
+			userName.style.border = "gray"
+		})
+		.catch(function (error) {
+			// handle error
+			console.log(error);
+		})
+		.finally(function () {
+			// always executed
+		});
+}
+setUserName()
