@@ -416,6 +416,10 @@ io.on('connection', (socket) => {
 		io.to(room).emit('receiveMessage', user, message)
 	})
 
+	socket.on('emitSaveOnGameOver', ({ user, room }) => {
+		io.to(room).emit('emitSave', user)
+	})
+
 	//Disconnected
 	socket.on('disconnect', () => {
 		totalUsers--;

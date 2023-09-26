@@ -502,6 +502,14 @@ socket.on('disconnectedStatus', () => {
 	messageEl.textContent = 'Opponent left the game!!'
 })
 
+socket.on('emitSave', (emittedUser) => {
+	var user = formEl[0].value
+	if (user !== emittedUser) {
+		alertCheckMate()
+		saveCheckpointListener()
+	}
+})
+
 //Receiving a message
 socket.on('receiveMessage', (user, message) => {
 	var chatContentEl = document.getElementById('chatContent')
@@ -740,12 +748,16 @@ function alertCheckMate() {
 		if (editorBoard.orientation().includes(editorGame.turn())) {
 			statusEl.textContent = "You lost, better luck next time :)"
 			alert("You lost")
+
 		}
 		else {
 			statusEl.textContent = "Congratulations, you won!!"
 			// alert("You Won")
 		}
-
+		var user = formEl[0].value
+		var room = formEl[1].value
+		socket.emit('emitSaveOnGameOver', { user, room })
+		saveCheckpointListener()
 		// if (editorGame.turn() === 'w')
 		// 	alert('Black Wins')
 		// if (editorGame.turn() === 'b')

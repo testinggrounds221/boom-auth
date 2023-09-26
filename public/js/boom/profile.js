@@ -37,7 +37,7 @@ function setGameHistory(response) {
 
 		let name = document.createElement("td");
 		name.innerHTML = element.checkPointName;
-		row.appendChild(name);
+		// row.appendChild(name);
 
 		let room = document.createElement("td");
 		room.innerHTML = element.room;
